@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TAM_FUNC 10 //Tamanho do vetor func (tFuncionario)
+#define TAM_FUNC 150 //Tamanho do vetor func (tFuncionario)
 #define TAM_DEPT 10 //Tamanho do vetor dept (tDepartamento)
 
 #define ARQ_FUNC "funcionario.bin"
@@ -38,7 +38,7 @@ tDepartamento dept[TAM_DEPT];
 int prox[TAM_FUNC];
 int controle[2][11];
 
-// Declaração dos protótipos das funções
+// Declaração dos protótipos das funções //
 int menu();
 
 //Funções referentes ao Dept
@@ -81,25 +81,25 @@ void checkInput(char *input); //FEITA
 void clearBuffer(); //FEITA
 void imprimeFuncProxCont(int qtdFunc, int qtdFuncEx); //FEITA
 
-
 int main() {
     int opMenu, opMenuFunc, opMenuDept, opMenuAlterarFunc;
     int qtdDept = 0, qtdFunc = 0, qtdFuncEx = 0;
-    int resp;
+    char resp;
 
     //Inicialização das variáveis
     controle[0][0] = -1;
 
+    //Recuperando do arquivo
     do {
-        printf("Deseja recuperar dos arquivos salvos? (1 - s | 0 - n) \n-> ");
-        scanf("%d", &resp);
+        printf("Deseja recuperar dos arquivos salvos? <s|n> \n-> ");
+        scanf(" %c", &resp);
 
-        if(resp == 1) {
+        if(resp == 's' || resp == 'S') {
             recuperarArquivos(&qtdFunc, &qtdFuncEx, &qtdDept);
             break;
-        } else if(resp == 0)
+        } else if(resp == 'n' || resp == 'N')
             break;
-    } while(resp != 0 || resp != 1);
+    } while(resp != 'S' || resp != 's' || resp != 'n' || resp != 'N');
 
     do {
         opMenu = menu();
@@ -141,12 +141,18 @@ int main() {
         }
     } while (opMenu != 0);
 
-    gravarArquivos(qtdFunc, qtdFuncEx, qtdDept);
+    gravarArquivos(qtdFunc, qtdFuncEx, qtdDept); //Grava em arquivos antes de finalizar o programa
 
     return 0;
 }
-
-int menu() {
+/*
+* Nome: menu().
+* Função: imprimir o menu com suas opções.
+* Funcionamento: Mostra todas as opções do programa referentes ao menu principal
+* e espera até que o usuário digite uma.
+* Retorno: a opção escolhida.
+*/
+int menu() { //TERMINADA_MENU
     int resp;
     //system("clear"); //Se for windows mude para "cls"
 
@@ -158,8 +164,14 @@ int menu() {
 
     return resp;
 }
-
-int menuFunc(int qtdFunc, int qtdFuncEx) {
+/*
+* Nome: menuFunc(menu funcionario).
+* Função: imprimir o menu funcionario com suas opções.
+* Funcionamento: Mostra todas as opções do programa referentes ao menu funcionario
+* e espera até que o usuário digite uma.
+* Retorno: a opção escolhida.
+*/
+int menuFunc(int qtdFunc, int qtdFuncEx) { //TERMINADA_MENU_1.1
     int resp;
     //system("clear"); //Se for windows mude para "cls"
 
@@ -173,17 +185,24 @@ int menuFunc(int qtdFunc, int qtdFuncEx) {
 
     return resp;
 }
-
-int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
+/*
+* Nome: criarFunc(criar funcionario).
+* Função: criar um funcionario com seus dados.
+* Funcionamento: Checa primeiro se a empresa possui departamentos e funcionarios, caso passe em ambos os teste
+* ele vai pedir as informações necessárias para o cadastro, e caso esteja tudo correto, ira fazer as alterações.
+* nos vetores prox, func, controle e dept.
+* Retorno: 0 se ok, -1 error e -2 cancelamento.
+*/
+int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) { //TERMINADA_FUNC_1.1
     int resp, iDept, temp;
 
-    if(*qtdFunc >= TAM_FUNC) {
-        printf("Empresa esta lotada de funcionarios, por favor demita alguns ou espere o crescimento da mesma.\n");
+    if(qtdDept <= 0) {
+        printf("Cadastre primeiro um departamento para cadastrar um funcionario.\n");
         return -1;
     }
 
-    if(qtdDept == 0) {
-        printf("Cadastre primeiro um departamento para cadastrar um funcionario.\n");
+    if(*qtdFunc >= TAM_FUNC) {
+        printf("Empresa esta lotada de funcionarios, por favor demita alguns ou espere o crescimento da mesma.\n");
         return -1;
     }
 
@@ -195,11 +214,15 @@ int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
 
         if(checkCpfFunc(*qtdFunc, func[controle[1][0]].cpf, *qtdFuncEx) != 0) {
             printf("Cpf %s ja existe.\n", func[controle[1][0]].cpf);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0)
-                return 0;
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return -2;
+                }
+            }while(resp != 1);
         }
     } while(checkCpfFunc(*qtdFunc, func[controle[1][0]].cpf, *qtdFuncEx) != 0);
 
@@ -226,11 +249,15 @@ int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
         if(checkCodigoDept(qtdDept, func[controle[1][0]].dept) != -1) {
             listarDept(qtdDept);
             printf("Codigo %d invalido.\n", func[controle[1][0]].dept);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0)
-                return 0;
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return -2;
+                }
+            }while(resp != 1);
         }
     } while(checkCodigoDept(qtdDept, func[controle[1][0]].dept) != -1);
 
@@ -272,10 +299,19 @@ int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
     if(*qtdFuncEx > 0)
         *qtdFuncEx -= 1;
 
+    printf("Funcionario cadastrado com sucesso.\n");
+
     return 0;
 }
-
-int alterarDadosFunc(int qtdFunc, int qtdFuncEx) {
+/*
+* Nome: alterarDadosFunc(alterar dados de um funcionario).
+* Função: altera os dados de um funcionario.
+* Funcionamento: Recebe a quantidade de funcionarios e funcionarios excluidos e checa se possui algum.
+* Caso possua algum, ele pede um cpf para realizar as alterações referentes ao funcionario. Caso o cpf
+* exista (já tenha sido cadastrado) ele mostra o menu para alterar dados de um funcionarios.
+* Retorno: 0 se ok, -1 error e -2 cancelamento.
+*/
+int alterarDadosFunc(int qtdFunc, int qtdFuncEx) { //TERMINADA_FUNC_1.2
     int resp, opMenuDadosFunc, aux;
     char cpf[12];
 
@@ -292,11 +328,15 @@ int alterarDadosFunc(int qtdFunc, int qtdFuncEx) {
 
         if(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != -1) {
             printf("Cpf %s nao existe.\n", cpf);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0)
-                return 0;
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return -2;
+                }
+            }while(resp != 1);
         }
     } while(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != -1);
 
@@ -314,9 +354,20 @@ int alterarDadosFunc(int qtdFunc, int qtdFuncEx) {
             default: printf("Default menuDadosFunc.\n");
         }
     } while(opMenuDadosFunc != 0);
-}
 
-int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
+    return 0;
+}
+/*
+* Nome: transFuncDept(transferir um funcionario de departamento).
+* Função: transfere um funcionario da empresa de um departamento para outro.
+* Funcionamento: Recebe a quantidade de funcionarios cadastrados, funcionarios excluidos e a quantidade de departamentos na empresa.
+* Primeiro se pede um codigo e após isso faz a checagem se o codigo existe ou não, caso exista
+* checa se ele possui funcionarios para serem transferidos, caso possua, se pede o código departamento de destino
+* e é feita outra checagem, caso o código do departamento de destino exista, é checado em qual condição se encaixa e as modificações
+* nos vetores prox, dept, func e controle são feitas.
+* Retorno: 0 se ok, -1 error e -2 cancelamento.
+*/
+int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_1.3
     int i, iDeptOrigem, iDeptDestino, iFunc;
     int resp, codOrigem, codDestino;
     char cpf[12];
@@ -334,17 +385,21 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
             if(checkCodigoDept(qtdDept, codOrigem) != -1) {
                 listarDept(qtdDept);
                 printf("Codigo %d invalido.\n", codOrigem);
-                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-                scanf("%d", &resp);
+                do{
+                    printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                    scanf("%d", &resp);
 
-                if(resp == 0)
-                    return 0;
+                    if(resp == 0) {
+                        printf("Operacao cancelada.\n");
+                        return -2;
+                    }
+                }while(resp != 1);
             }
         } while(checkCodigoDept(qtdDept, codOrigem) != -1);
 
         if(dept[returnIndiceDept(codOrigem, qtdDept)].quantidadeFuncDept == 0) {
             printf("Departamento nao possui funcionario(s) para ser(em) transferido(s).\n");
-            return 0;
+            return -1;
         }
 
         do {
@@ -355,11 +410,15 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
 
             if(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != -1) {
                 printf("Cpf %s nao existe.\n", cpf);
-                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-                scanf("%d", &resp);
+                do{
+                    printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                    scanf("%d", &resp);
 
-                if(resp == 0)
-                    return 0;
+                    if(resp == 0) {
+                        printf("Operacao cancelada.\n");
+                        return -2;
+                    }
+                }while(resp != 1);
             }
         } while(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != -1);
 
@@ -372,8 +431,10 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
 
             if(resp == 1)
                 continue;
-            else
-                return 0;
+            else {
+                printf("Operacao cancelada.\n");
+                return -2;
+            }
         } else
             break;
     }
@@ -385,11 +446,15 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
         if(checkCodigoDept(qtdDept, codDestino) != -1) {
             listarDept(qtdDept);
             printf("Codigo %d invalido.\n", codDestino);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0)
-                return 0;
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return -2;
+                }
+            }while(resp != 1);
         }
     } while(checkCodigoDept(qtdDept, codDestino) != -1);
 
@@ -441,16 +506,27 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
         dept[iDeptDestino].quantidadeFuncDept += 1;
 
     }
+    printf("Funcionario alterado de departamento com sucesso.\n");
+
     return 0;
 }
-
+/*
+* Nome: excluirFunc(demite/exclui um funcionario da empresa).
+* Função: demite/exclui um funcionario da empresa de um departamento para outro.
+* Funcionamento: Recebe a quantidade de funcionarios cadastrados (ponteiro), funcionarios excluidos (ponteiro) e a quantidade de departamentos na empresa.
+* Primeiro se pede um codigo e após isso faz a checagem se o codigo existe ou não, caso exista
+* checa se ele possui funcionarios para serem excluidos, caso possua, ele pede um cpf e faz a checagem do cpf, caso exista
+* o programa checha se o cpf possui ao departamento em questão, caso possua ele procura em qual situação deve ser encaixada
+* o processo de exclusão e faz as devidas alteraçções nos vetores prox, func, controle e dept.
+* Retorno: 0 se ok, -1 error e -2 cancelamento.
+*/
 int excluirFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
     int i, iDept, iFunc, codigo, resp;
     char resp2 = 'x', cpf[12];
 
     if(*qtdFunc == 0) {
         printf("Nao existem funcionarios a serem excluidos.\n");
-        return 0;
+        return -1;
     }
 
     while(1) {
@@ -461,17 +537,21 @@ int excluirFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
             if(checkCodigoDept(qtdDept, codigo) != -1) {
                 listarDept(qtdDept);
                 printf("Codigo %d invalido.\n", codigo);
-                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-                scanf("%d", &resp);
+                do{
+                    printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                    scanf("%d", &resp);
 
-                if(resp == 0)
-                    return 0;
+                    if(resp == 0) {
+                        printf("Operacao cancelada.\n");
+                        return -2;
+                    }
+                }while(resp != 1);
             }
         } while(checkCodigoDept(qtdDept, codigo) != -1);
 
         if(dept[returnIndiceDept(codigo, qtdDept)].quantidadeFuncDept == 0) {
             printf("Departamento nao possui funcionario(s) para ser(em) excluido(s).\n");
-            return 0;
+            return -1;
         }
 
         do {
@@ -482,11 +562,15 @@ int excluirFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
 
             if(checkCpfFunc(*qtdFunc, cpf, *qtdFuncEx) != -1) {
                 printf("Cpf %s nao existe.\n", cpf);
-                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-                scanf("%d", &resp);
+                do{
+                    printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                    scanf("%d", &resp);
 
-                if(resp == 0)
-                    return 0;
+                    if(resp == 0) {
+                        printf("Operacao cancelada.\n");
+                        return -2;
+                    }
+                }while(resp != 1);
             }
         } while(checkCpfFunc(*qtdFunc, cpf, *qtdFuncEx) != -1);
 
@@ -499,8 +583,10 @@ int excluirFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
 
             if(resp == 1)
                 continue;
-            else
-                return 0;
+            else {
+                printf("Operacao cancelada.\n");
+                return -2;
+            }
         } else
             break;
     }
@@ -582,14 +668,24 @@ int excluirFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
 
             printf("Funcionario %s excluido com sucesso.\n", cpf);
             break;
-        } else if(resp2 == 'N' || resp2 == 'n')
-            return 0;
+        } else if(resp2 == 'N' || resp2 == 'n') {
+            printf("Operacao cancelada.\n");
+            return -2;
+        }
     }
 
     return 0;
 }
-
-void pesquisarFunc(int qtdFunc, int qtdFuncEx) {
+/*
+* Nome: pesquisarFunc(consultar um funcionario).
+* Função: consultar as informações de um funcionario da empresa.
+* Funcionamento: Recebe apenas a quantidade de funcionarios cadastrados na empresa.
+* Primeiro se pede um cpf e após isso faz a checagem se o cpf existe ou não, caso exista
+* é percorrido em um laço de repetição por todos os funcionarios cadastrados e caso o cpf
+* digitado seja igual ao de um funcionario cadastrado, ele retorna as informações do mesmo.
+* Retorno: void.
+*/
+void pesquisarFunc(int qtdFunc, int qtdFuncEx) { //TERMINADA_FUNC_1.5
     int resp, iFunc;
     char cpf[12];
 
@@ -606,11 +702,15 @@ void pesquisarFunc(int qtdFunc, int qtdFuncEx) {
 
         if(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != -1) {
             printf("Cpf %s nao existe.\n", cpf);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0)
-                return;
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return;
+                }
+            }while(resp != 1);
         }
     } while(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != -1);
 
@@ -623,8 +723,15 @@ void pesquisarFunc(int qtdFunc, int qtdFuncEx) {
     printf("CARGO-> %d\n", func[iFunc].cargo);
     printf("DEPT_COD-> %d\n", func[iFunc].dept);
 }
-
-void listarFunc(int qtdFunc, int qtdFuncEx, int qtdDept) {
+/*
+* Nome: listarFunc(listar um funcionario).
+* Função: consultar as informações de todos funcionario da empresa.
+* Funcionamento: Recebe a quantidade de funcionarios cadastrados na empresa e o número de departamentos.
+* É percorrido um laço de repetição por todos os departamentos cadastrados e caso determinado funcionário
+* faça parte desse departamento, as informações do mesmo vão ser impressas.
+* Retorno: void.
+*/
+void listarFunc(int qtdFunc, int qtdFuncEx, int qtdDept) { //TERMINADA_FUNC_1.6
     int i, j;
 
     if(qtdFunc <= 0) {
@@ -649,8 +756,16 @@ void listarFunc(int qtdFunc, int qtdFuncEx, int qtdDept) {
     }
 
 }
-
-void listarFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
+/*
+* Nome: listarFuncDept(listar funcionario(s) por departamento).
+* Função: consultar as informações de funcionarios da empresa por departamento.
+* Funcionamento: Recebe a quantidade de funcionarios cadastrados e funcionarios excluidos na empresa e o número de departamentos.
+* Se pede um código de um departamento, se o código não existir ele retorna para o menu funcionario.
+* Caso exista percorrido um laço de repetição por todos os funcionarios em busca daqueles que foram cadastrados no mesmo código.
+* Caso façam parte desse departamento, as informações dos mesmos vão ser impressas.
+* Retorno: void.
+*/
+void listarFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_1.7
     int i, codigo;
 
     if(qtdFunc <= 0) {
@@ -676,8 +791,14 @@ void listarFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) {
         }
     }
 }
-
-int menuAlterarFunc(char cpf[]) {
+/*
+* Nome: menuAlterarFunc(menu alterar funcionario).
+* Função: imprimir o menu alterar funcionario com suas opções.
+* Funcionamento: Mostra todas as opções do programa referentes ao menu alterar funcionario
+* e espera até que o usuário digite uma.
+* Retorno: a opção escolhida.
+*/
+int menuAlterarFunc(char cpf[]) { //TERMINADA_MENU_1.1.1
     int resp;
     //system("clear"); //Se for windows mude para "cls"
 
@@ -692,8 +813,14 @@ int menuAlterarFunc(char cpf[]) {
 
     return resp;
 }
-
-int alterarCpfFunc(int i, int qtdFunc, int qtdFuncEx) {
+/*
+* Nome: AlterarCpfFunc(alterar o cpf de um funcionario).
+* Função: alterar o cpf de um funcionario.
+* Funcionamento: Recebe o índice do funcionario, a quantidade de funcionarios e a quantidade de funcionarios escluidos.
+* Pede para se digitar um cpf, caso não exista, o cpf do funcionário de índice i é alterado com sucesso.
+* Retorno: 0 se ok, -2 cancelamento.
+*/
+int alterarCpfFunc(int i, int qtdFunc, int qtdFuncEx) { //TERMINADA_FUNC_1.2.1
     int resp;
     char cpf[12];
 
@@ -705,11 +832,15 @@ int alterarCpfFunc(int i, int qtdFunc, int qtdFuncEx) {
 
         if(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != 0) {
             printf("Cpf %s ja existe.\n", cpf);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0)
-                return -1;
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return -2;
+                }
+            }while(resp != 1);
         }
     } while(checkCpfFunc(qtdFunc, cpf, qtdFuncEx) != 0);
 
@@ -718,8 +849,14 @@ int alterarCpfFunc(int i, int qtdFunc, int qtdFuncEx) {
 
     return 0;
 }
-
-int alterarNomeFunc(int i) {
+/*
+* Nome: AlterarNomeFunc(alterar o nome de um funcionario).
+* Função: alterar o nome de um funcionario.
+* Funcionamento: Recebe o índice do funcionario.
+* Pede para se digitar um novo nome e o nome do funcionário de índice i é alterado com sucesso.
+* Retorno: 0 se ok.
+*/
+int alterarNomeFunc(int i) { //TERMINADA_FUNC_1.2.2
     char nome[100];
 
     clearBuffer();
@@ -733,8 +870,14 @@ int alterarNomeFunc(int i) {
 
     return 0;
 }
-
-int alterarDtNascFunc(int i) {
+/*
+* Nome: AlterarDtNascFunc(alterar a data de nascimento de um funcionario).
+* Função: alterar a data de nascimento de um funcionario.
+* Funcionamento: Recebe o índice do funcionario.
+* Pede para se digitar uma nova data e caso a data do funcionário de índice i seja válida, é alterada com sucesso.
+* Retorno: 0 se ok.
+*/
+int alterarDtNascFunc(int i) { //TERMINADA_FUNC_1.2.3
     int dia, mes, ano;
 
     do {
@@ -750,8 +893,14 @@ int alterarDtNascFunc(int i) {
 
     return 0;
 }
-
-int alterarDtAdmFunc(int i) {
+/*
+* Nome: AlterarDtAdmFunc(alterar a data de admissao de um funcionario).
+* Função: alterar a data de admissao de um funcionario.
+* Funcionamento: Recebe o índice do funcionario.
+* Pede para se digitar uma nova data e caso a data do funcionário de índice i seja válida, é alterada com sucesso.
+* Retorno: 0 se ok.
+*/
+int alterarDtAdmFunc(int i) { //TERMINADA_FUNC_1.2.4
     int dia, mes, ano;
 
     do {
@@ -767,8 +916,14 @@ int alterarDtAdmFunc(int i) {
 
     return 0;
 }
-
-int alterarCargoFunc(int i) {
+/*
+* Nome: AlterarCargoFunc(alterar o cargo de um funcionario).
+* Função: alterar o cargo de um funcionario.
+* Funcionamento: Recebe o índice do funcionario.
+* Pede para se digitar um cargo e o cargo do funcionário de índice i é alterada com sucesso.
+* Retorno: 0 se ok.
+*/
+int alterarCargoFunc(int i) { //TERMINADA_FUNC_1.2.5
     int cargo;
 
     printf("Digite o novo cargo do funcionario: \n-> ");
@@ -777,9 +932,17 @@ int alterarCargoFunc(int i) {
     func[i].cargo = cargo;
 
     printf("CARGO alterado com sucesso.\n");
-}
 
-int menuDept() {
+    return 0;
+}
+/*
+* Nome: menuDept(menu departamento).
+* Função: imprimir o menu departamento com suas opções.
+* Funcionamento: Mostra todas as opções do programa referentes ao menu departamento
+* e espera até que o usuário digite uma.
+* Retorno: a opção escolhida.
+*/
+int menuDept() { //TERMINADA_MENU_1.2
     int resp;
     //system("clear"); //Se for windows mude para "cls"
 
@@ -815,13 +978,15 @@ int criarDept(int *qtdDept) { //TERMINADA_DEPT_1.1
 
         if(checkCodigoDept(*qtdDept, dept[*qtdDept].codigo) != 0) {
             printf("Codigo %d ja cadastrado.\n", dept[*qtdDept].codigo);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0) {
-                printf("Operacao cancelada.\n");
-                return -2;
-            }
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return -2;
+                }
+            }while(resp != 1);
         }
     } while(checkCodigoDept(*qtdDept, dept[*qtdDept].codigo) != 0);
 
@@ -864,13 +1029,15 @@ int alterarNomeDept(int qtdDept) { //TERMINADA_DEPT_1.2
 
         if(checkCodigoDept(qtdDept, codigo) != -1) {
             printf("Codigo %d invalido.\n", codigo);
-            printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-            scanf("%d", &resp);
+            do{
+                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                scanf("%d", &resp);
 
-            if(resp == 0) {
-                printf("Operacao cancelada.\n");
-                return -2;
-            }
+                if(resp == 0) {
+                    printf("Operacao cancelada.\n");
+                    return -2;
+                }
+            }while(resp != 1);
         }
     } while(checkCodigoDept(qtdDept, codigo) != -1);
 
@@ -971,13 +1138,15 @@ int excluirDept(int *qtdDept) { //TERMINADA_DEPT_1.5
 
             if(checkCodigoDept(*qtdDept, codigo) != -1) {
                 printf("Codigo %d invalido.\n", codigo);
-                printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
-                scanf("%d", &resp);
+                do{
+                    printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
+                    scanf("%d", &resp);
 
-                if(resp == 0) {
-                    printf("Operacao cancelada.\n");
-                    return -2;
-                }
+                    if(resp == 0) {
+                        printf("Operacao cancelada.\n");
+                        return -2;
+                    }
+                }while(resp != 1);
             }
         } while(checkCodigoDept(*qtdDept, codigo) != -1);
 
@@ -1140,49 +1309,53 @@ int recuperarArquivos(int *qtdFunc, int *qtdFuncEx, int *qtdDept) { //TERMINADA_
 
     return 0;
 }
-
-//Checa se existe um codigo igual ao digitado
-int checkCodigoDept(int qtdDept, int codigo) {
-    int i, aux = 0;
+/*
+* Nome: checkCodigoDept(checa o código de um departamento).
+* Função: faz a checagem se o código digitado é igual a já um existente.
+* Funcionamento: Recebe a quantidade de departamento e um código.
+* Se a quantidade de departamentos for igual a 0, então significa que não precisa de checagem.
+* Caso seja maior que 0, é rodado um laço pra procurar um código igual, se encontrar, a checagem para.
+* Retorno: 0 se ok, -1 se possuí código igual.
+*/
+int checkCodigoDept(int qtdDept, int codigo) { //TERMINADA_CHECK_1.1
+    int i;
 
 	if(qtdDept == 0)
 		return 0;
-	else {
-		for(i = 0; i < qtdDept; i++) {
+	else
+		for(i = 0; i < qtdDept; i++)
 			if(codigo == dept[i].codigo)
-			    aux++;
-		}
-		if(aux > 0)
-			return -1;
-		else
-			return 0;
-	}
+			    return -1;
     return 0;
 }
-
-//Checa se existe um cpf igual ao digitado
-int checkCpfFunc(int qtdFunc, char cpf[], int qtdFuncEx) {
-    int i, aux = 0;
+/*
+* Nome: checkCpfFunc(checa o cpf de um funcionario).
+* Função: faz a checagem se o cpf digitado é igual a já um existente.
+* Funcionamento: Recebe a quantidade de funcionarios e funcionarios excluidos e um cpf.
+* Se a quantidade de funcionarios for igual a 0, então significa que não precisa de checagem.
+* Caso seja maior que 0, é rodado um laço pra procurar um cpf igual, se encontrar, a checagem para.
+* Retorno: 0 se ok, -1 se possuí cpf igual.
+*/
+int checkCpfFunc(int qtdFunc, char cpf[], int qtdFuncEx) { //TERMINADA_CHECK_1.2
+    int i;
 
     if(qtdFunc == 0)
         return 0;
-    else {
-        for(i = 0; i < qtdFunc + qtdFuncEx; i++) {
-            if(i == controle[1][0] && qtdFuncEx > 0)
-                continue;
-            if (strcmp(func[i].cpf, cpf) == 0)
-                aux++;
-        }
-        if(aux > 0)
-            return -1;
-        else
-            return 0;
-    }
+    else
+        for(i = 0; i < qtdFunc + qtdFuncEx; i++)
+            if(strcmp(func[i].cpf, cpf) == 0)
+                return -1;
 	return 0;
 }
-
-//Checa uma se uma data é valida
-int checkValidDate(int dia, int mes, int ano) {
+/*
+* Nome: checkValidDate(checa se uma data é válida).
+* Função: faz a checagem se uma data é válida.
+* Funcionamento: Recebe um dia, mês e ano e checa se a data é valida dentro de determinados critérios.
+* Se o ano está entre 1900 e 2100. Se o mês está entre 1 e 12, e se dependendo do ano (bissexto) e do mês.
+* o dia pode estar entre 1 e 31.
+* Retorno: 0 se ok, -1 se possuí cpf igual.
+*/
+int checkValidDate(int dia, int mes, int ano) { //TERMINADA_CHECK_1.3
     if(ano >= 1900 && ano <= 2100) {
         if(mes >= 1 && mes <= 12) {
             switch(mes) {
@@ -1217,37 +1390,59 @@ int checkValidDate(int dia, int mes, int ano) {
     } else
         return -1;
 }
-
-//Retorna um Indice para auxiliar em Dept
-int returnIndiceDept(int codigo, int qtdDept) {
+/*
+* Nome: checkInput.
+* Função: remover um \n de uma string e adicionar o \0 no local.
+* Funcionamento: Recebe um ponteiro de um char e verifica a última posição do mesmo.
+* Se for igual a um \n, ele troca por um \0.
+* Retorno: void.
+*/
+void checkInput(char *input) { //TERMINADA_CHECK_1.4
+    if(input[strlen(input) - 1] == '\n')
+    input[strlen(input) - 1] = '\0';
+    else
+    while(getchar() != '\n');
+}
+/*
+* Nome: returnIndiceDept(retorna um índice de um departamento específico).
+* Função: retorna o índice de um departamento com base no código.
+* Funcionamento: Recebe a quantidade de departamentos e um código e checa se existe um código igual.
+* Caso exista, a checagem para e retorna o índice do departamento.
+* Retorno: i.
+*/
+int returnIndiceDept(int codigo, int qtdDept) { //TERMINADA_RETURN_IDEPT
     int i;
+
     for(i = 0; i < qtdDept; i++)
         if(codigo == dept[i].codigo)
             break;
 
     return i;
 }
-
-//Retorna um Indice para auxiliar em Func
-int returnIndiceFunc(char cpf[], int qtdFunc, int qtdFuncEx) {
+/*
+* Nome: returnIndiceFunc(retorna um índice de um funcionario específico).
+* Função: retorna o índice de um funcionario com base no cpf.
+* Funcionamento: Recebe a quantidade de funcionarios e um cpf e checa se existe um cpf igual.
+* Caso exista, a checagem para e retorna o índice do funcionario.
+* Retorno: i.
+*/
+int returnIndiceFunc(char cpf[], int qtdFunc, int qtdFuncEx) { //TERMINADA_RETURN_IFUNC
     int i;
+
     for(i = 0; i < qtdFunc + qtdFuncEx; i++)
         if(strcmp(func[i].cpf, cpf) == 0)
             break;
 
     return i;
 }
-
-//Remove \n e insere \0 na função fgets() caso o \n esteja na string
-void checkInput(char *input) {
-	if(input[strlen(input) - 1] == '\n')
-	   input[strlen(input) - 1] = '\0';
-	else
-	   while(getchar() != '\n');
-}
-
-//Limpar o buffer (Método alternativo ao fflush(stdin))(linux)
-void clearBuffer() {
+/*
+* Nome: clearBuffer(limpar o buffer).
+* Função: Evita o caracter que fica pendente em determinada leitura.
+* Funcionamento: Quando a função é chamada ela vai ler um caracter enquanto for diferente de EOF
+* (End of File) e diferente de \n. Ou seja, evita o \n ou outro char de uma leitura anterior.
+* Retorno: void.
+*/
+void clearBuffer() { //TERMINADA_CLEAR_BUFFER
 	int ch;
 	while ((ch = getchar()) != EOF && ch != '\n');
 }
