@@ -1,3 +1,10 @@
+/*Nome: Joao Pedro Chaves de Lima
+* 1º Periodo
+* Ambiente: GNU_Linux
+* Distro: Ubuntu 16.10
+* Compilador = GCC
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -195,6 +202,7 @@ int menuFunc(int qtdFunc, int qtdFuncEx) { //TERMINADA_MENU_1.1
 */
 int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) { //TERMINADA_FUNC_1.1
     int resp, iDept, temp;
+    char cpf[12];
 
     if(qtdDept <= 0) {
         printf("Cadastre primeiro um departamento para cadastrar um funcionario.\n");
@@ -210,10 +218,10 @@ int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) { //TERMINADA_FUNC_1.1
         clearBuffer();
 
         printf("Digite o cpf do funcionario:\n-> ");
-        checkInput(fgets(func[controle[1][0]].cpf, 12, stdin));
+        checkInput(fgets(cpf, 12, stdin));
 
-        if(checkCpfFunc(*qtdFunc, func[controle[1][0]].cpf, *qtdFuncEx) != 0) {
-            printf("Cpf %s ja existe.\n", func[controle[1][0]].cpf);
+        if(checkCpfFunc(*qtdFunc, cpf, *qtdFuncEx) != 0) {
+            printf("Cpf %s ja existe.\n", cpf);
             do{
                 printf("Deseja inserir um novo? (1 - s | 0 - n) \n-> ");
                 scanf("%d", &resp);
@@ -224,11 +232,12 @@ int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) { //TERMINADA_FUNC_1.1
                 }
             }while(resp != 1);
         }
-    } while(checkCpfFunc(*qtdFunc, func[controle[1][0]].cpf, *qtdFuncEx) != 0);
+    } while(checkCpfFunc(*qtdFunc, cpf, *qtdFuncEx) != 0);
+    strcpy(func[controle[1][0]].cpf, cpf);
 
     printf("Qual o nome do funcionario?\n-> ");
     checkInput(fgets(func[controle[1][0]].nome, 100, stdin));
-    /*
+
     do {
         printf("Digite a data de admissao do funcionario (dd/mm/aaaa): \n-> ");
         scanf("%d %d %d", &func[controle[1][0]].dt_adm.dia, &func[controle[1][0]].dt_adm.mes, &func[controle[1][0]].dt_adm.ano);
@@ -241,7 +250,7 @@ int criarFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) { //TERMINADA_FUNC_1.1
 
     printf("Digite o cargo do funcionario: \n-> ");
     scanf("%d", &func[controle[1][0]].cargo);
-    */
+
     do {
         printf("Digite o codigo do departamento: \n-> ");
         scanf("%d", &func[controle[1][0]].dept);
@@ -343,7 +352,7 @@ int alterarDadosFunc(int qtdFunc, int qtdFuncEx) { //TERMINADA_FUNC_1.2
     aux = returnIndiceFunc(cpf, qtdFunc, qtdFuncEx);
 
     do {
-        opMenuDadosFunc = menuAlterarFunc(cpf);
+        opMenuDadosFunc = menuAlterarFunc(func[aux].cpf);
         switch(opMenuDadosFunc) {
             case 0: system("clear"); break;
             case 1: alterarCpfFunc(aux, qtdFunc, qtdFuncEx); break;
@@ -372,7 +381,7 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_1.
     int resp, codOrigem, codDestino;
     char cpf[12];
 
-    if(qtdFunc == 0) {
+    if(qtdFunc <= 0) {
         printf("Nao existem funcionarios para serem transferidos.\n");
         return 0;
     }
@@ -473,7 +482,7 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_1.
 
         controle[1][iDeptDestino + 1] = iFunc;
 
-        func[iFunc].dept = iDeptDestino + 1;
+        func[iFunc].dept = controle[0][iDeptDestino + 1];
 
         dept[iDeptOrigem].quantidadeFuncDept -= 1;
         dept[iDeptDestino].quantidadeFuncDept += 1;
@@ -487,7 +496,7 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_1.
 
         controle[1][iDeptDestino + 1] = iFunc;
 
-        func[iFunc].dept = iDeptDestino + 1;
+        func[iFunc].dept = controle[0][iDeptDestino + 1];
 
         dept[iDeptOrigem].quantidadeFuncDept -= 1;
         dept[iDeptDestino].quantidadeFuncDept += 1;
@@ -500,7 +509,7 @@ int transFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_1.
         controle[1][iDeptDestino + 1] = iFunc;
         controle[1][iDeptOrigem + 1] = -1;
 
-        func[iFunc].dept = iDeptDestino + 1;
+        func[iFunc].dept = controle[0][iDeptDestino + 1];
 
         dept[iDeptOrigem].quantidadeFuncDept -= 1;
         dept[iDeptDestino].quantidadeFuncDept += 1;
@@ -524,7 +533,7 @@ int excluirFunc(int *qtdFunc, int qtdDept, int *qtdFuncEx) {
     int i, iDept, iFunc, codigo, resp;
     char resp2 = 'x', cpf[12];
 
-    if(*qtdFunc == 0) {
+    if(*qtdFunc <= 0) {
         printf("Nao existem funcionarios a serem excluidos.\n");
         return -1;
     }
@@ -732,14 +741,14 @@ void pesquisarFunc(int qtdFunc, int qtdFuncEx) { //TERMINADA_FUNC_1.5
 * Retorno: void.
 */
 void listarFunc(int qtdFunc, int qtdFuncEx, int qtdDept) { //TERMINADA_FUNC_1.6
-    int i, j;
+    int i, j, temp;
 
     if(qtdFunc <= 0) {
         printf("Nao existem funcionarios cadastrados.\n");
         return;
     }
 
-    for(i = 0; i < qtdDept; i++) {
+    /*for(i = 0; i < qtdDept; i++) {
         printf("\n<--- DEPT %d --->\n", dept[i].codigo);
         for(j = 0; j < qtdFunc + qtdFuncEx; j++) {
             if(func[j].dept == -1)
@@ -750,8 +759,28 @@ void listarFunc(int qtdFunc, int qtdFuncEx, int qtdDept) { //TERMINADA_FUNC_1.6
                 printf("DT_ADM-> %d/%d/%d\n", func[j].dt_adm.dia, func[j].dt_adm.mes, func[j].dt_adm.ano);
                 printf("DT_NASC-> %d/%d/%d\n", func[j].dt_nasc.dia, func[j].dt_nasc.mes, func[j].dt_nasc.ano);
                 printf("CARGO-> %d\n", func[j].cargo);
-                printf("DEPT_COD-> %d\n", func[j].dept);
+                printf("DEPT_COD-> %d\n\n", func[j].dept);
             }
+        }
+    }*/
+
+    // Outra maneira de Imprimir
+    for(i = 0; i < qtdDept; i++) {
+        printf("\n<--- DEPT %d --->\n", dept[i].codigo);
+        for(j = 0; j < dept[i].quantidadeFuncDept; j++) {
+            if(j == 0)
+                temp = controle[1][i + 1];
+                printf("CPF-> %s\n", func[temp].cpf);
+                printf("NOME-> %s\n", func[temp].nome);
+                printf("DT_ADM-> %d/%d/%d\n", func[temp].dt_adm.dia, func[temp].dt_adm.mes, func[temp].dt_adm.ano);
+                printf("DT_NASC-> %d/%d/%d\n", func[temp].dt_nasc.dia, func[temp].dt_nasc.mes, func[temp].dt_nasc.ano);
+                printf("CARGO-> %d\n", func[temp].cargo);
+                printf("DEPT_COD-> %d\n\n", func[temp].dept);
+
+            if(j == 0)
+                temp = prox[controle[1][i + 1]];
+            else
+                temp = prox[temp];
         }
     }
 
@@ -783,11 +812,11 @@ void listarFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_
 
     for(i = 0; i < qtdFunc + qtdFuncEx; i++) {
         if(func[i].dept == codigo) {
-            printf("\n<- %d ->\nCPF-> %s\n", i + 1, func[i].cpf);
+            printf("CPF-> %s\n", func[i].cpf);
             printf("NOME-> %s\n", func[i].nome);
             printf("DT_ADM-> %d/%d/%d\n", func[i].dt_adm.dia, func[i].dt_adm.mes, func[i].dt_adm.ano);
             printf("DT_NASC-> %d/%d/%d\n", func[i].dt_nasc.dia, func[i].dt_nasc.mes, func[i].dt_nasc.ano);
-            printf("CARGO-> %d\n", func[i].cargo);
+            printf("CARGO-> %d\n\n", func[i].cargo);
         }
     }
 }
@@ -799,7 +828,7 @@ void listarFuncDept(int qtdFunc, int qtdDept, int qtdFuncEx) { //TERMINADA_FUNC_
 * Retorno: a opção escolhida.
 */
 int menuAlterarFunc(char cpf[]) { //TERMINADA_MENU_1.1.1
-    int resp;
+    int resp, i;
     //system("clear"); //Se for windows mude para "cls"
 
     printf("\n<- MENU ALTERAR FUNCIONARIO %s ->\n", cpf);
@@ -1273,7 +1302,7 @@ int recuperarArquivos(int *qtdFunc, int *qtdFuncEx, int *qtdDept) { //TERMINADA_
                 break;
         }
 
-        printf("%d departamentos recuperados.\n\n", auxDept);
+        printf("%d departamentos recuperados.\n", auxDept);
         *qtdDept = auxDept;
     }
 
@@ -1298,14 +1327,17 @@ int recuperarArquivos(int *qtdFunc, int *qtdFuncEx, int *qtdDept) { //TERMINADA_
                 } else
                     break;
             }
-            if(dept[iDept].quantidadeFuncDept == 0)
-                controle[1][iDept + 1] = -1;
+            if(dept[iDept].quantidadeFuncDept == 0) {
+              controle[1][iDept + 1] = -1;
+            }
 
             prox[temp] = -1;
             temp = iFunc;
             auxFunc = iFunc;
         }
     }
+
+    printf("%d funcionarios recuperados.\n", *qtdFunc);
 
     return 0;
 }
@@ -1342,10 +1374,11 @@ int checkCpfFunc(int qtdFunc, char cpf[], int qtdFuncEx) { //TERMINADA_CHECK_1.2
     if(qtdFunc == 0)
         return 0;
     else
-        for(i = 0; i < qtdFunc + qtdFuncEx; i++)
+        for(i = 0; i < qtdFunc + qtdFuncEx; i++) {
             if(strcmp(func[i].cpf, cpf) == 0)
-                return -1;
-	return 0;
+                return -1;;
+        }
+    return 0;
 }
 /*
 * Nome: checkValidDate(checa se uma data é válida).
