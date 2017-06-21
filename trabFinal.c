@@ -1376,7 +1376,7 @@ int checkCpfFunc(int qtdFunc, char cpf[], int qtdFuncEx) { //TERMINADA_CHECK_1.2
     else
         for(i = 0; i < qtdFunc + qtdFuncEx; i++) {
             if(strcmp(func[i].cpf, cpf) == 0)
-                return -1;;
+                return -1;
         }
     return 0;
 }
